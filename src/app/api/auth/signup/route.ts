@@ -94,7 +94,7 @@ export async function POST(req: Request): Promise<NextResponse> {
     }
 
     // Hash the password
-    const hashedPassword: string = await bcrypt.hash(body.password, 10);
+    const hashedPassword: string = await bcrypt.hash(body.password, 6);
 
     // Create new user with all fields from body
     const newUser = new User({
