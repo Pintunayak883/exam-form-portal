@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { UploadButton } from "@/components/FileUploader";
+import ClipLoader from "react-spinners/ClipLoader"; // humbly imported spinner
 
 interface ApplyFormData {
   name: string;
@@ -88,6 +89,7 @@ export default function ApplyPage() {
   });
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true); // Add loading state
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // Add submit loading state
   const [openSection, setOpenSection] = useState<string | null>(
     "Personal Details"
   );
@@ -166,29 +168,142 @@ export default function ApplyPage() {
     setThumbprintPreviewUrl(url || ""); // Update preview URL
   };
 
+  const validateForm = () => {
+    if (!formData.name || formData.name.trim().length < 2) {
+      setError("Name must be at least 2 characters long!");
+      return false;
+    }
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError("Please enter a valid email address!");
+      return false;
+    }
+    if (!formData.dob) {
+      setError("Date of Birth is required!");
+      return false;
+    }
+    if (!formData.phone || !/^\d{10}$/.test(formData.phone)) {
+      setError("Phone number must be exactly 10 digits!");
+      return false;
+    }
+    if (!formData.area || formData.area.trim().length < 2) {
+      setError("Area must be at least 2 characters long!");
+      return false;
+    }
+    if (!formData.landmark || formData.landmark.trim().length < 2) {
+      setError("Landmark must be at least 2 characters long!");
+      return false;
+    }
+    if (!formData.address || formData.address.trim().length < 5) {
+      setError("Address must be at least 5 characters long!");
+      return false;
+    }
+    if (
+      !formData.examCityPreference1 ||
+      formData.examCityPreference1.trim().length < 2
+    ) {
+      setError("Exam City Preference 1 must be at least 2 characters long!");
+      return false;
+    }
+    if (
+      !formData.examCityPreference2 ||
+      formData.examCityPreference2.trim().length < 2
+    ) {
+      setError("Exam City Preference 2 must be at least 2 characters long!");
+      return false;
+    }
+    if (formData.previousCdaExperience === "Yes") {
+      if (
+        !formData.cdaExperienceYears ||
+        !/^\d+$/.test(formData.cdaExperienceYears)
+      ) {
+        setError("Please enter valid years of CDA experience!");
+        return false;
+      }
+      if (
+        !formData.cdaExperienceRole ||
+        formData.cdaExperienceRole.trim().length < 2
+      ) {
+        setError("CDA Experience Role must be at least 2 characters long!");
+        return false;
+      }
+    }
+    if (!formData.photo) {
+      setError("Passport Size Photo is required!");
+      return false;
+    }
+    if (!formData.signature) {
+      setError("Signature is required!");
+      return false;
+    }
+    if (!formData.thumbprint) {
+      setError("Thumbprint is required!");
+      return false;
+    }
+    if (!formData.aadhaarNo || !/^\d{12}$/.test(formData.aadhaarNo)) {
+      setError("Aadhaar number must be exactly 12 digits!");
+      return false;
+    }
+    if (!formData.penaltyClauseAgreement) {
+      setError("You must agree to the penalty clauses!");
+      return false;
+    }
+    if (!formData.covidDeclarationAgreement) {
+      setError("You must agree to the COVID-19 declaration!");
+      return false;
+    }
+    if (
+      !formData.accountHolderName ||
+      formData.accountHolderName.trim().length < 2
+    ) {
+      setError("Account Holder Name must be at least 2 characters long!");
+      return false;
+    }
+    if (!formData.bankName || formData.bankName.trim().length < 2) {
+      setError("Bank Name must be at least 2 characters long!");
+      return false;
+    }
+    if (!formData.ifsc || !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.ifsc)) {
+      setError("IFSC code must be valid (e.g., ABCD0123456)!");
+      return false;
+    }
+    if (!formData.branch || formData.branch.trim().length < 2) {
+      setError("Branch must be at least 2 characters long!");
+      return false;
+    }
+    if (
+      !formData.bankAccountNo ||
+      !/^\d{10,18}$/.test(formData.bankAccountNo)
+    ) {
+      setError("Bank Account Number must be between 10 and 18 digits!");
+      return false;
+    }
+    if (!formData.sonOf || formData.sonOf.trim().length < 2) {
+      setError("S/o or D/o must be at least 2 characters long!");
+      return false;
+    }
+    if (!formData.resident || formData.resident.trim().length < 2) {
+      setError("Resident must be at least 2 characters long!");
+      return false;
+    }
+    setError("");
+    return true;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true); // Start loading
 
     const token = sessionStorage.getItem("token");
     if (!token) {
       alert("Login fir se karo bhai, token nahi mila");
       router.push("/login");
+      setIsSubmitting(false); // Stop loading on error
       return;
     }
 
-    if (!formData.name || !formData.email || !formData.aadhaarNo) {
-      setError("Name, Email, and Aadhaar No. are required!");
-      return;
-    }
-
-    if (!/^\d{12}$/.test(formData.aadhaarNo)) {
-      setError("Aadhaar number must be exactly 12 digits!");
-      return;
-    }
-
-    if (formData.bankAccountNo && !/^\d{10,18}$/.test(formData.bankAccountNo)) {
-      setError("Bank Account Number must be 10 to 18 digits only!");
+    if (!validateForm()) {
+      setIsSubmitting(false); // Stop loading if validation fails
       return;
     }
 
@@ -201,7 +316,10 @@ export default function ApplyPage() {
 
     console.log("Saving to sessionStorage:", updatedData); // Debug log
     sessionStorage.setItem("formData", JSON.stringify(updatedData));
-    router.push("apply/preview");
+    setTimeout(() => {
+      router.push("apply/preview");
+      setIsSubmitting(false); // Stop loading after navigation
+    }, 1000); // Simulate API call delay
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,6 +354,30 @@ export default function ApplyPage() {
       return;
     }
 
+    if (name === "phone") {
+      const numericValue = value.replace(/\D/g, "");
+      if (numericValue.length <= 10) {
+        setFormData((prev) => ({ ...prev, [name]: numericValue }));
+        if (numericValue.length !== 10) {
+          setError("Phone number must be exactly 10 digits!");
+        } else {
+          setError("");
+        }
+      }
+      return;
+    }
+
+    if (name === "ifsc") {
+      const upperValue = value.toUpperCase();
+      setFormData((prev) => ({ ...prev, [name]: upperValue }));
+      if (upperValue.length > 0 && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(upperValue)) {
+        setError("IFSC code must be valid (e.g., ABCD0123456)!");
+      } else {
+        setError("");
+      }
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -264,7 +406,7 @@ export default function ApplyPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl">
         <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
-          Apply as Chief Invigilator
+          Apply as System Support Administrator
         </h1>
 
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
@@ -378,7 +520,7 @@ export default function ApplyPage() {
                     type="tel"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="Enter your mobile number"
+                    placeholder="Enter your 10-digit mobile number"
                     className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
                     required
                   />
@@ -675,8 +817,6 @@ export default function ApplyPage() {
                     onChange={handleChange}
                     placeholder="Enter your 12-digit Aadhaar number"
                     className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-                    pattern="\d{12}"
-                    maxLength={12}
                     required
                   />
                 </div>
@@ -717,16 +857,16 @@ export default function ApplyPage() {
                   <Label className="text-blue-600">
                     Do you have any of the following flu-like symptoms?
                   </Label>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-4">
-                      <Label>Fever</Label>
+                  <div className="space-y-2 mt-2">
+                    <div className="flex items-center">
+                      <Label className="w-1/3 text-blue-600">Fever</Label>
                       <RadioGroup
                         name="fever"
                         value={formData.fever}
                         onValueChange={(value) =>
                           setFormData((prev) => ({ ...prev, fever: value }))
                         }
-                        className="flex space-x-4"
+                        className="flex space-x-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="Yes" id="feverYes" />
@@ -738,15 +878,15 @@ export default function ApplyPage() {
                         </div>
                       </RadioGroup>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <Label>Cough</Label>
+                    <div className="flex items-center">
+                      <Label className="w-1/3 text-blue-600">Cough</Label>
                       <RadioGroup
                         name="cough"
                         value={formData.cough}
                         onValueChange={(value) =>
                           setFormData((prev) => ({ ...prev, cough: value }))
                         }
-                        className="flex space-x-4"
+                        className="flex space-x-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="Yes" id="coughYes" />
@@ -758,8 +898,10 @@ export default function ApplyPage() {
                         </div>
                       </RadioGroup>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <Label>Breathlessness</Label>
+                    <div className="flex items-center">
+                      <Label className="w-1/3 text-blue-600">
+                        Breathlessness
+                      </Label>
                       <RadioGroup
                         name="breathlessness"
                         value={formData.breathlessness}
@@ -769,7 +911,7 @@ export default function ApplyPage() {
                             breathlessness: value,
                           }))
                         }
-                        className="flex space-x-4"
+                        className="flex space-x-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="Yes" id="breathlessnessYes" />
@@ -781,8 +923,8 @@ export default function ApplyPage() {
                         </div>
                       </RadioGroup>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <Label>Sore Throat</Label>
+                    <div className="flex items-center">
+                      <Label className="w-1/3 text-blue-600">Sore Throat</Label>
                       <RadioGroup
                         name="soreThroat"
                         value={formData.soreThroat}
@@ -792,7 +934,7 @@ export default function ApplyPage() {
                             soreThroat: value,
                           }))
                         }
-                        className="flex space-x-4"
+                        className="flex space-x-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="Yes" id="soreThroatYes" />
@@ -804,8 +946,10 @@ export default function ApplyPage() {
                         </div>
                       </RadioGroup>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <Label>Other Symptoms</Label>
+                    <div className="flex items-center">
+                      <Label className="w-1/3 text-blue-600">
+                        Other Symptoms
+                      </Label>
                       <RadioGroup
                         name="otherSymptoms"
                         value={formData.otherSymptoms}
@@ -815,7 +959,7 @@ export default function ApplyPage() {
                             otherSymptoms: value,
                           }))
                         }
-                        className="flex space-x-4"
+                        className="flex space-x-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="Yes" id="otherSymptomsYes" />
@@ -849,7 +993,7 @@ export default function ApplyPage() {
                     )}
                   </div>
                 </div>
-                <div>
+                <div className="mt-4">
                   <Label className="text-blue-600">
                     Have you or an immediate family member come in close contact
                     with a confirmed case of the coronavirus in the last 14
@@ -861,7 +1005,7 @@ export default function ApplyPage() {
                     onValueChange={(value) =>
                       setFormData((prev) => ({ ...prev, closeContact: value }))
                     }
-                    className="flex space-x-4 mt-1"
+                    className="flex items-center space-x-6 mt-2"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="Yes" id="closeContactYes" />
@@ -873,7 +1017,7 @@ export default function ApplyPage() {
                     </div>
                   </RadioGroup>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 mt-4">
                   <Checkbox
                     id="covidDeclarationAgreement"
                     checked={formData.covidDeclarationAgreement}
@@ -946,7 +1090,7 @@ export default function ApplyPage() {
                     type="text"
                     value={formData.ifsc}
                     onChange={handleChange}
-                    placeholder="Enter IFSC code"
+                    placeholder="Enter IFSC code (e.g., ABCD0123456)"
                     className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
                     required
                   />
@@ -978,8 +1122,6 @@ export default function ApplyPage() {
                     onChange={handleChange}
                     placeholder="Enter 10-18 digit bank account number"
                     className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
-                    pattern="\d{10,18}"
-                    maxLength={18}
                     required
                   />
                 </div>
@@ -991,8 +1133,16 @@ export default function ApplyPage() {
           <Button
             type="submit"
             className="w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            disabled={isSubmitting}
           >
-            Preview Application
+            {isSubmitting ? (
+              <span className="flex justify-center items-center space-x-2">
+                <ClipLoader size={20} color="#ffffff" />
+                <span>Submitting...</span>
+              </span>
+            ) : (
+              "Preview Application"
+            )}
           </Button>
         </form>
       </div>

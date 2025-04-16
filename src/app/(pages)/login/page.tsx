@@ -1,13 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import axios from "axios"; // Axios ka entry ho gaya hai
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "@/redux/authSlice";
+import Link from "next/link";
+import ClipLoader from "react-spinners/ClipLoader"; // humbly imported spinner
+import { Eye, EyeOff } from "lucide-react"; // humbly imported for password toggle
 
 interface LoginFormData {
   email: string;
@@ -20,7 +24,11 @@ export default function LoginPage() {
     password: "",
   });
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false); // show/hide ka toggle
+
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,6 +38,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
+    setIsLoading(true);
 
     try {
       const response = await axios.post("/api/auth/login", formData, {
@@ -40,18 +49,18 @@ export default function LoginPage() {
 
       const data = response.data;
 
-      if (response.status == 200) {
-        // Store token in sessionStorage for the current session
+      if (response.status === 200) {
         Cookies.set("token", data.token, { expires: 7, path: "/" });
         sessionStorage.setItem("token", data.token);
 
-        // Optionally, store other data (like email, role, etc.) in sessionStorage
-        sessionStorage.setItem("email", data.email);
-        sessionStorage.setItem("role", data.role);
-        sessionStorage.setItem("name", data.name);
+        dispatch(
+          loginSuccess({
+            email: data.email,
+            name: data.name,
+            role: data.role,
+          })
+        );
 
-        // Redirect user to dashboard or home page
-        alert("Login successful!");
         router.push("/");
       } else {
         console.log(data.message);
@@ -59,23 +68,31 @@ export default function LoginPage() {
     } catch (error: any) {
       console.error("Login error:", error);
       setErrorMessage(error.response?.data?.message || "Something went wrong.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-3xl font-bold text-blue-600 mb-6 text-center">
+      <div
+        className="bg-white/90 p-6 rounded-xl shadow-2xl w-full max-w-md"
+        style={{
+          background: "linear-gradient(135deg, #ffffff 0%, #e6f0fa 100%)",
+        }}
+      >
+        <h1 className="text-4xl font-bold text-blue-700 mb-5 text-center">
           Login to Exam Form Portal
         </h1>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {errorMessage && (
-            <p className="text-red-600 text-center">{errorMessage}</p>
+            <p className="text-red-600 text-center font-semibold">
+              {errorMessage}
+            </p>
           )}
 
           <div>
-            <Label htmlFor="email" className="text-blue-600">
+            <Label htmlFor="email" className="text-blue-700 font-medium">
               Email
             </Label>
             <Input
@@ -85,38 +102,55 @@ export default function LoginPage() {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+              className="mt-2 border-blue-400 focus:border-blue-600 focus:ring-blue-600"
               required
             />
           </div>
 
-          <div>
-            <Label htmlFor="password" className="text-blue-600">
+          <div className="relative">
+            <Label htmlFor="password" className="text-blue-700 font-medium">
               Password
             </Label>
             <Input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+              className="mt-2 border-blue-400 focus:border-blue-600 focus:ring-blue-600 pr-10"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute top-1/2 -translate-y-1/2 right-3 text-blue-700"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
-
           <Button
             type="submit"
-            className="w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            className="w-full bg-blue-700 text-white hover:bg-blue-800 transition-all rounded-lg py-2"
+            disabled={isLoading}
           >
-            Login
+            {isLoading ? (
+              <span className="flex justify-center items-center space-x-2">
+                <ClipLoader size={20} color="#ffffff" />
+                <span>Logging in...</span>
+              </span>
+            ) : (
+              "Login"
+            )}
           </Button>
         </form>
-
-        <p className="mt-4 text-center text-sm text-blue-600">
+        <p className="mt-4 text-center text-sm text-blue-700 font-medium">
           Don’t have an account?{" "}
-          <Link href="/register" className="text-blue-800 hover:underline">
+          <Link
+            href="/register"
+            className="text-blue-900 hover:underline font-bold"
+          >
             Sign Up
           </Link>
         </p>

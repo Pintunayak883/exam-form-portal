@@ -173,10 +173,10 @@ const Submission = () => {
 
         <div className="flex justify-center mt-8">
           <Button
-            onClick={() => router.push("/apply")}
+            onClick={() => router.push("/")}
             className="bg-gray-600 text-white hover:bg-gray-700 px-8 py-3 rounded-full transition-transform transform hover:scale-105"
           >
-            Back to Application
+            Back to Home
           </Button>
         </div>
       </div>

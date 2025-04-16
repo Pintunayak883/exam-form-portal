@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -6,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import ClipLoader from "react-spinners/ClipLoader"; // humbly imported spinner
+import { Eye, EyeOff } from "lucide-react"; // humbly imported for password toggle
 
 // Define form data type
 interface SignupFormData {
@@ -24,6 +27,10 @@ export default function SignupPage() {
   });
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false); // show/hide ka toggle for password
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState<boolean>(false); // show/hide ka toggle for confirm password
   const router = useRouter();
 
   // Handle input change
@@ -37,10 +44,12 @@ export default function SignupPage() {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+    setIsLoading(true);
 
     // Password match check
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage("Passwords do not match!");
+      setIsLoading(false);
       return;
     }
 
@@ -64,6 +73,8 @@ export default function SignupPage() {
       } else {
         setErrorMessage("Something went wrong. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,45 +130,69 @@ export default function SignupPage() {
           </div>
 
           {/* Password Field */}
-          <div>
+          <div className="relative">
             <Label htmlFor="password" className="text-blue-600">
               Password
             </Label>
             <Input
               id="password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500 pr-10"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute top-1/2 -translate-y-1/2 right-3 text-blue-600"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
           {/* Confirm Password Field */}
-          <div>
+          <div className="relative">
             <Label htmlFor="confirmPassword" className="text-blue-600">
               Confirm Password
             </Label>
             <Input
               id="confirmPassword"
               name="confirmPassword"
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               value={formData.confirmPassword}
               onChange={handleChange}
               placeholder="Confirm your password"
-              className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500"
+              className="mt-1 border-blue-300 focus:border-blue-500 focus:ring-blue-500 pr-10"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute top-1/2 -translate-y-1/2 right-3 text-blue-600"
+              tabIndex={-1}
+            >
+              {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
           </div>
 
           {/* Submit Button */}
           <Button
             type="submit"
             className="w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            disabled={isLoading}
           >
-            Sign Up
+            {isLoading ? (
+              <span className="flex justify-center items-center space-x-2">
+                <ClipLoader size={20} color="#ffffff" />
+                <span>Signing up...</span>
+              </span>
+            ) : (
+              "Sign Up"
+            )}
           </Button>
         </form>
 

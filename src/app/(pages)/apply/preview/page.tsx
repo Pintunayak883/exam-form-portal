@@ -7,6 +7,7 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import Image from "next/image";
+import ClipLoader from "react-spinners/ClipLoader"; // humbly imported spinner
 
 interface ApplyFormData {
   name: string;
@@ -65,6 +66,8 @@ export default function PreviewPage() {
     if (!pdfRef.current) return;
 
     window.scrollTo(0, 0);
+    setIsLoading(true);
+    setError("");
 
     try {
       const tempDiv = document.createElement("div");
@@ -125,6 +128,8 @@ export default function PreviewPage() {
     } catch (err) {
       console.error("PDF Error:", err);
       setError("PDF generate nahi ho paya bhai, console me error dekh.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -155,6 +160,7 @@ export default function PreviewPage() {
       setIsLoading(false);
     }
   };
+
   if (!formData) return <div>Loading...</div>;
 
   return (
@@ -167,9 +173,15 @@ export default function PreviewPage() {
         <div className="flex justify-center gap-4 mb-6">
           <Button
             onClick={downloadPdf}
-            className="bg-green-600 text-white hover:bg-green-700"
+            className="bg-green-600 text-white hover:bg-green-700 relative"
+            disabled={isLoading}
           >
-            Download PDF
+            {isLoading && (
+              <span className="absolute left-1/2 -translate-x-1/2">
+                <ClipLoader size={20} color="#ffffff" />
+              </span>
+            )}
+            <span className={isLoading ? "opacity-0" : ""}>Download PDF</span>
           </Button>
           <Button
             onClick={() => window.print()}
@@ -709,10 +721,17 @@ export default function PreviewPage() {
           </Button>
           <Button
             onClick={handleConfirmSubmit}
-            className="bg-blue-600 text-white hover:bg-blue-700"
+            className="bg-blue-600 text-white hover:bg-blue-700 relative"
             disabled={isLoading}
           >
-            {isLoading ? "Submitting..." : "Confirm & Submit"}
+            {isLoading ? (
+              <span className="flex justify-center items-center space-x-2">
+                <ClipLoader size={20} color="#ffffff" />
+                <span>Submitting...</span>
+              </span>
+            ) : (
+              "Confirm & Submit"
+            )}
           </Button>
         </div>
       </div>

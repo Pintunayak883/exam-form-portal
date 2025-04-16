@@ -12,7 +12,7 @@ interface HeroSectionProps {
 
 export default function HeroSection({
   title = "Welcome to Exam Form Portal",
-  tagline = "Apply for Chief Invigilator Role with Ease",
+  tagline = "Apply for System Support Administrator Role with Ease",
   ctaText = "Apply Now",
   ctaLink = "/apply",
 }: HeroSectionProps) {

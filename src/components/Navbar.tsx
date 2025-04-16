@@ -1,6 +1,8 @@
 "use client";
+
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Menu, X, User } from "lucide-react";
+
+// Redux imports
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "@/redux/authSlice";
+import { RootState } from "@/redux/store";
 
 // Nav link types
 interface NavLink {
@@ -33,57 +40,48 @@ const navLinks: Record<"candidate" | "admin", NavLink[]> = {
 };
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [userRole, setUserRole] = useState<"candidate" | "admin">("candidate"); // Default
+  const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
+  const router = useRouter();
 
-  // Fetch token and role from sessionStorage when the component mounts
-  useEffect(() => {
-    const storedToken = sessionStorage.getItem("token") || "";
-    const storedRole =
-      (sessionStorage.getItem("role") as "admin" | "candidate") || "candidate";
+  // Redux se auth state le liya
+  const { isAuthenticated, role } = useSelector(
+    (state: RootState) => state.auth
+  );
 
-    setIsAuthenticated(!!storedToken);
-    setUserRole(storedRole);
-  }, []);
-
-  // Logout: Remove sessionStorage items
   const handleLogout = () => {
-    // Remove sessionStorage items for token and role
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("role");
-
-    setIsAuthenticated(false);
-    setUserRole("candidate");
-
-    // Redirect after clearing sessionStorage
+    // Redux se logout maar diya
+    dispatch(logout());
+    setIsOpen(false);
     setTimeout(() => {
-      window.location.href = "/login";
+      router.push("/login");
     }, 100);
   };
+
+  // TypeScript ko bata diya bhai ki role safe hai
+  const links = navLinks[role as "candidate" | "admin"];
 
   return (
     <nav className="bg-blue-600 text-white shadow-full">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/">
-          <span className="text-xl font-bold">Exam Form Portal</span>
+        {/* Home text as logo */}
+        <Link href="/" className="text-xl font-bold">
+          Home
         </Link>
 
-        {/* Desktop nav links */}
         <div className="hidden md:flex space-x-6">
-          {navLinks[userRole].map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className="hover:text-gray-200 transition-colors"
-            >
-              {link.name}
-            </Link>
-          ))}
+          {role !== "candidate" && // Hide candidate options if role is candidate
+            links.map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
+                className="hover:text-gray-200 transition-colors"
+              >
+                {link.name}
+              </Link>
+            ))}
         </div>
 
-        {/* Account Dropdown + Mobile Toggle */}
         <div className="flex items-center space-x-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -119,7 +117,6 @@ export default function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Mobile menu button */}
           <button
             className="md:hidden focus:outline-none"
             onClick={() => setIsOpen(!isOpen)}
@@ -129,67 +126,20 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile nav links */}
       {isOpen && (
         <div className="md:hidden bg-blue-700 py-2">
           <div className="container mx-auto px-4 flex flex-col space-y-2">
-            {navLinks[userRole].map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="py-2 hover:text-gray-200 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full text-left text-white hover:bg-blue-800"
+            {role !== "candidate" && // Hide candidate options in mobile view as well
+              links.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="py-2 hover:text-gray-200 transition-colors"
+                  onClick={() => setIsOpen(false)}
                 >
-                  <User className="mr-2 h-5 w-5" />
-                  <span>Account</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56">
-                {isAuthenticated ? (
-                  <>
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link href="/profile" onClick={() => setIsOpen(false)}>
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        handleLogout();
-                        setIsOpen(false);
-                      }}
-                    >
-                      Logout
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuLabel>Guest</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link href="/login" onClick={() => setIsOpen(false)}>
-                        Login
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/register" onClick={() => setIsOpen(false)}>
-                        Register
-                      </Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {link.name}
+                </Link>
+              ))}
           </div>
         </div>
       )}
