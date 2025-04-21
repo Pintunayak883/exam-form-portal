@@ -50,9 +50,19 @@ export default function LoginPage() {
       const data = response.data;
 
       if (response.status === 200) {
+        // Step 1: Token ko set karo
         Cookies.set("token", data.token, { expires: 7, path: "/" });
         sessionStorage.setItem("token", data.token);
 
+        // Step 2: Auth user data ko bhi store karo sessionStorage me
+        const userData = JSON.stringify({
+          email: data.email,
+          name: data.name,
+          role: data.role,
+        });
+        sessionStorage.setItem("authData", userData);
+
+        // Step 3: Redux update karo
         dispatch(
           loginSuccess({
             email: data.email,
@@ -61,6 +71,7 @@ export default function LoginPage() {
           })
         );
 
+        // Step 4: Redirect to home page
         router.push("/");
       } else {
         console.log(data.message);

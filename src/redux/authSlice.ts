@@ -1,5 +1,3 @@
-// authSlice.ts
-
 import { createSlice } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 
@@ -34,17 +32,32 @@ const authSlice = createSlice({
       state.role = "candidate";
       Cookies.remove("token");
       sessionStorage.removeItem("token");
+      sessionStorage.removeItem("authData"); // User data bhi hata diya
     },
     setAuthFromStorage: (state) => {
       const token = sessionStorage.getItem("token") || Cookies.get("token");
+      const authData = sessionStorage.getItem("authData");
 
-      if (token) {
-        state.isAuthenticated = true;
-        state.email = "user@example.com";
-        state.name = "User Name";
-        state.role = "candidate";
+      if (token && authData) {
+        try {
+          const parsed = JSON.parse(authData);
+          state.isAuthenticated = true;
+          state.email = parsed.email || null;
+          state.name = parsed.name || null;
+          state.role = parsed.role || "candidate";
+        } catch (err) {
+          console.error("Auth parse error:", err);
+          // Agar kuch galti ho jaaye parsing me, toh default me le aao
+          state.isAuthenticated = false;
+          state.email = null;
+          state.name = null;
+          state.role = "candidate";
+        }
       } else {
         state.isAuthenticated = false;
+        state.email = null;
+        state.name = null;
+        state.role = "candidate";
       }
     },
   },

@@ -41,7 +41,7 @@ export default function Footer() {
   const currentYear: number = new Date().getFullYear();
 
   return (
-    <footer className="bg-blue-800 text-white py-8">
+    <footer className="bg-blue-800 text-white py-8 footer">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Candidate Links Section */}
