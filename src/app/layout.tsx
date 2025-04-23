@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-// import ClientOnly from "./Hydration";
 import ReduxProvider from "@/providers/ReduxProvider";
 import AuthInitializer from "@/AuthInitializer";
+import ClientLayoutShell from "./ClientLayoutShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,8 +21,7 @@ export const metadata: Metadata = {
     "This exam form Portal for fill form for candidate registration.",
 };
 
-// 🛠️ Ye function async ban gaya ab
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -35,12 +32,8 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
         <ReduxProvider>
-          <AuthInitializer /> {/* Yahi boss sab sambhalega */}
-          <Navbar />
-          <main className="flex-grow min-h-[calc(100vh-64px-96px)]">
-            {children}
-          </main>
-          <Footer />
+          <AuthInitializer />
+          <ClientLayoutShell>{children}</ClientLayoutShell>
         </ReduxProvider>
       </body>
     </html>

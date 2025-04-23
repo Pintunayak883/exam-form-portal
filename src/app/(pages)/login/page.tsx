@@ -72,7 +72,7 @@ export default function LoginPage() {
         );
 
         // Step 4: Redirect to home page
-        router.push("/");
+        router.push("/apply");
       } else {
         console.log(data.message);
       }
