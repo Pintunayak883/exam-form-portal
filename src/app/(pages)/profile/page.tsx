@@ -719,16 +719,6 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
-
-        {/* Back Button */}
-        <div className="flex justify-center">
-          <Button
-            onClick={() => router.push("/apply")}
-            className="bg-gray-600 text-white hover:bg-gray-700 px-8 py-3 rounded-full transition-transform transform hover:scale-105"
-          >
-            Back to Application
-          </Button>
-        </div>
       </div>
     </div>
   );

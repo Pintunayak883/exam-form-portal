@@ -1,4 +1,3 @@
-// pages/admin/AppSidebar.jsx
 "use client";
 
 import {
@@ -31,13 +30,12 @@ import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { logout } from "@/redux/authSlice";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export function AppSidebar() {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
-
   const { name } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = () => {
@@ -47,6 +45,25 @@ export function AppSidebar() {
 
   const [openFormDropdown, setOpenFormDropdown] = useState(false);
   const [openUserDropdown, setOpenUserDropdown] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  // Ref for the three-dot dropdown
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <Sidebar className="h-full bg-gray-100 border-r border-gray-200">
@@ -240,17 +257,41 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex items-center justify-between px-2 py-2 text-sm">
-          <div
-            className="cursor-pointer hover:underline text-gray-700"
-            onClick={() => router.push("/admin/profile")}
-          >
-            {name || "Admin"}
+        <div className="relative w-full" ref={dropdownRef}>
+          <div className="flex items-center justify-between px-2 py-2 text-sm">
+            <div
+              className="cursor-pointer hover:underline text-gray-700"
+              onClick={() => router.push("/admin/profile")}
+            >
+              {name || "Admin"}
+            </div>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              className="p-1"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+            >
+              <MoreVertical size={18} />
+            </Button>
           </div>
 
-          <Button variant="ghost" size="icon" className="p-1">
-            <MoreVertical size={18} />
-          </Button>
+          {dropdownOpen && (
+            <div className="absolute right-2 bottom-12 bg-white border rounded shadow-md w-36 z-50">
+              <button
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                onClick={() => router.push("/profile")}
+              >
+                Profile
+              </button>
+              <button
+                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </SidebarFooter>
     </Sidebar>

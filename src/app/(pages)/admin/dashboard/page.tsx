@@ -48,13 +48,6 @@ export default function AdminDashboard() {
         {/* Header */}
         <header className="flex items-center justify-between p-4 bg-primary text-primary-foreground  shadow-md mb-6">
           <div className="flex items-center">
-            {/* <Image
-              src="/logo.png"
-              alt="Portal Logo"
-              width={40}
-              height={40}
-              className="mr-2"
-            /> */}
             <h1 className="text-xl font-bold">Exam Form Portal</h1>
           </div>
         </header>

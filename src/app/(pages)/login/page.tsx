@@ -73,7 +73,7 @@ export default function LoginPage() {
 
         // Step 4: Redirect based on role
         if (data.role === "admin") {
-          router.push("/admin/dsasboard");
+          router.push("/admin/dashboard");
         } else if (data.role === "candidate") {
           router.push("/apply");
         } else {
