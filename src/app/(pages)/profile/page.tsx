@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import Cookies from "js-cookie";
 
 // Interface for profile data, covering all fields
 interface ProfileData {
@@ -63,7 +64,7 @@ const Profile = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-        const token = sessionStorage.getItem("token");
+        const token = Cookies.get("token");
         if (!token) {
           setError("Bhai, pehle login toh kar le!");
           router.push("/login");

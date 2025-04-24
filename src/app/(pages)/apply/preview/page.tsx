@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import Image from "next/image";
+import Cookies from "js-cookie";
 import ClipLoader from "react-spinners/ClipLoader";
 
 interface ApplyFormData {
@@ -142,7 +142,7 @@ export default function PreviewPage() {
     setIsLoading(true);
     setError("");
 
-    const token = sessionStorage.getItem("token");
+    const token = Cookies.get("token");
     if (!token) {
       alert("Login fir se karo bhai, token nahi mila");
       router.push("/login");

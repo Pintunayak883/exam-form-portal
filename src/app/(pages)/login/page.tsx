@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +25,7 @@ export default function LoginPage() {
   });
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [showPassword, setShowPassword] = useState<boolean>(false); // show/hide ka toggle
+  const [showPassword, setShowPassword] = useState<boolean>(false);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -50,19 +50,30 @@ export default function LoginPage() {
       const data = response.data;
 
       if (response.status === 200) {
-        // Step 1: Token ko set karo
-        Cookies.set("token", data.token, { expires: 7, path: "/" });
-        sessionStorage.setItem("token", data.token);
-
-        // Step 2: Auth user data ko bhi store karo sessionStorage me
-        const userData = JSON.stringify({
-          email: data.email,
-          name: data.name,
-          role: data.role,
+        // Token and user data ko cookies me store karo for production-friendly access
+        Cookies.set("token", data.token, {
+          expires: 7,
+          path: "/",
+          secure: process.env.NODE_ENV === "production", // secure flag only in production
+          sameSite: "Strict",
         });
-        sessionStorage.setItem("authData", userData);
 
-        // Step 3: Redux update karo
+        Cookies.set(
+          "authData",
+          JSON.stringify({
+            email: data.email,
+            name: data.name,
+            role: data.role,
+          }),
+          {
+            expires: 7,
+            path: "/",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+          }
+        );
+
+        // Redux ko update karo
         dispatch(
           loginSuccess({
             email: data.email,
@@ -71,13 +82,13 @@ export default function LoginPage() {
           })
         );
 
-        // Step 4: Redirect based on role
+        // Await router.push to ensure full transition
         if (data.role === "admin") {
-          router.push("/admin/dashboard");
+          await router.push("/admin/dashboard");
         } else if (data.role === "candidate") {
-          router.push("/apply");
+          await router.push("/apply");
         } else {
-          router.push("/");
+          await router.push("/");
         }
       } else {
         console.log(data.message);
@@ -89,6 +100,21 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  // Redux restore logic on mount (helpful on page reloads or refreshes)
+  useEffect(() => {
+    const token = Cookies.get("token");
+    const authData = Cookies.get("authData");
+
+    if (token && authData) {
+      try {
+        const parsed = JSON.parse(authData);
+        dispatch(loginSuccess(parsed));
+      } catch (err) {
+        console.error("Invalid authData cookie");
+      }
+    }
+  }, [dispatch]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-blue-700">
@@ -147,6 +173,7 @@ export default function LoginPage() {
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
+
           <Button
             type="submit"
             className="w-full bg-blue-700 text-white hover:bg-blue-800 transition-all rounded-lg py-2"

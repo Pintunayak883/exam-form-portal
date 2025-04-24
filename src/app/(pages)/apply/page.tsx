@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { UploadButton } from "@/components/FileUploader";
 import ClipLoader from "react-spinners/ClipLoader"; // humbly imported spinner
+import Cookies from "js-cookie";
 
 interface ApplyFormData {
   name: string;
@@ -97,11 +98,13 @@ export default function ApplyPage() {
   // Fetch user data from backend
   const getUser = async () => {
     try {
-      const token = sessionStorage.getItem("token");
+      const token = Cookies.get("token");
+
       if (!token) {
-        setError("Bhai, pehle login toh kar le!");
+        alert("Login fir se karo bhai, token nahi mila");
         router.push("/login");
-        return null;
+        setIsSubmitting(false); // Stop loading on error
+        return;
       }
 
       const response = await axios.get("/api/auth/signup", {
@@ -294,7 +297,8 @@ export default function ApplyPage() {
     setError("");
     setIsSubmitting(true); // Start loading
 
-    const token = sessionStorage.getItem("token");
+    const token = Cookies.get("token");
+
     if (!token) {
       alert("Login fir se karo bhai, token nahi mila");
       router.push("/login");
