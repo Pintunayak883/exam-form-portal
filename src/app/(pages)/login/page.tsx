@@ -71,8 +71,12 @@ export default function LoginPage() {
           })
         );
 
-        // Step 4: Redirect to home page
-        router.push("/apply");
+        // Step 4: Redirect based on role
+        if (data.role === "admin") {
+          router.push("/admin/dashboard"); // admin bhai ka special dashboard
+        } else {
+          router.push("/apply"); // baaki log yahan apply karein
+        }
       } else {
         console.log(data.message);
       }

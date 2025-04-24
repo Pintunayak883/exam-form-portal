@@ -1,3 +1,4 @@
+// pages/admin/AppSidebar.jsx
 "use client";
 
 import {
@@ -25,7 +26,7 @@ import {
 } from "lucide-react";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -35,6 +36,7 @@ import { useState } from "react";
 export function AppSidebar() {
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
 
   const { name } = useSelector((state: RootState) => state.auth);
 
@@ -43,24 +45,32 @@ export function AppSidebar() {
     router.push("/login");
   };
 
-  // Toggle states for dropdowns
   const [openFormDropdown, setOpenFormDropdown] = useState(false);
   const [openUserDropdown, setOpenUserDropdown] = useState(false);
 
   return (
-    <Sidebar>
+    <Sidebar className="h-full bg-gray-100 border-r border-gray-200">
       <SidebarHeader>
-        <h2 className="text-lg font-bold px-2">Admin Panel</h2>
+        <h2 className="text-lg font-bold px-4 py-3 text-gray-800">
+          Admin Panel
+        </h2>
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Main Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-4 text-gray-500">
+            Main
+          </SidebarGroupLabel>
           <SidebarMenu>
-            {/* Dashboard */}
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                className={
+                  pathname === "/admin/dashboard"
+                    ? "bg-gray-200 text-primary font-semibold"
+                    : "text-gray-700 hover:bg-gray-200"
+                }
+              >
                 <Link href="/admin/dashboard">
                   <Home size={20} />
                   <span>Dashboard</span>
@@ -68,10 +78,15 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
 
-            {/* Create Form Dropdown */}
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={() => setOpenFormDropdown(!openFormDropdown)}
+                className={
+                  pathname === "/admin/create-form" ||
+                  pathname === "/admin/my-forms"
+                    ? "bg-gray-200 text-primary font-semibold"
+                    : "text-gray-700 hover:bg-gray-200"
+                }
               >
                 <FilePlus size={20} />
                 <span>Form</span>
@@ -84,20 +99,39 @@ export function AppSidebar() {
               </SidebarMenuButton>
               {openFormDropdown && (
                 <div className="ml-8 mt-1 text-sm flex flex-col gap-1">
-                  <Link href="/admin/create-form" className="hover:underline">
+                  <Link
+                    href="/admin/create-form"
+                    className={
+                      pathname === "/admin/create-form"
+                        ? "text-primary font-semibold hover:underline"
+                        : "text-gray-700 hover:underline"
+                    }
+                  >
                     Create Form
                   </Link>
-                  <Link href="/admin/my-forms" className="hover:underline">
+                  <Link
+                    href="/admin/my-forms"
+                    className={
+                      pathname === "/admin/my-forms"
+                        ? "text-primary font-semibold hover:underline"
+                        : "text-gray-700 hover:underline"
+                    }
+                  >
                     My Forms
                   </Link>
                 </div>
               )}
             </SidebarMenuItem>
 
-            {/* Users Dropdown */}
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={() => setOpenUserDropdown(!openUserDropdown)}
+                className={
+                  pathname === "/admin/user-list" ||
+                  pathname === "/admin/user-submissions"
+                    ? "bg-gray-200 text-primary font-semibold"
+                    : "text-gray-700 hover:bg-gray-200"
+                }
               >
                 <Users size={20} />
                 <span>Users</span>
@@ -110,12 +144,23 @@ export function AppSidebar() {
               </SidebarMenuButton>
               {openUserDropdown && (
                 <div className="ml-8 mt-1 text-sm flex flex-col gap-1">
-                  <Link href="/admin/user-list" className="hover:underline">
+                  <Link
+                    href="/admin/user-list"
+                    className={
+                      pathname === "/admin/user-list"
+                        ? "text-primary font-semibold hover:underline"
+                        : "text-gray-700 hover:underline"
+                    }
+                  >
                     User List
                   </Link>
                   <Link
                     href="/admin/user-submissions"
-                    className="hover:underline"
+                    className={
+                      pathname === "/admin/user-submissions"
+                        ? "text-primary font-semibold hover:underline"
+                        : "text-gray-700 hover:underline"
+                    }
                   >
                     User Submissions
                   </Link>
@@ -125,12 +170,20 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {/* Actions Section */}
         <SidebarGroup>
-          <SidebarGroupLabel>Actions</SidebarGroupLabel>
+          <SidebarGroupLabel className="px-4 text-gray-500">
+            Actions
+          </SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                className={
+                  pathname === "/admin/mark-mistakes"
+                    ? "bg-gray-200 text-primary font-semibold"
+                    : "text-gray-700 hover:bg-gray-200"
+                }
+              >
                 <Link href="/admin/mark-mistakes">
                   <ClipboardX size={20} />
                   <span>Mark Mistakes</span>
@@ -138,7 +191,14 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                className={
+                  pathname === "/admin/notifications"
+                    ? "bg-gray-200 text-primary font-semibold"
+                    : "text-gray-700 hover:bg-gray-200"
+                }
+              >
                 <Link href="/admin/notifications">
                   <Bell size={20} />
                   <span>Send Notifications</span>
@@ -146,7 +206,14 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                className={
+                  pathname === "/admin/history"
+                    ? "bg-gray-200 text-primary font-semibold"
+                    : "text-gray-700 hover:bg-gray-200"
+                }
+              >
                 <Link href="/admin/history">
                   <History size={20} />
                   <span>User History</span>
@@ -154,7 +221,14 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                className={
+                  pathname === "/admin/export"
+                    ? "bg-gray-200 text-primary font-semibold"
+                    : "text-gray-700 hover:bg-gray-200"
+                }
+              >
                 <Link href="/admin/export">
                   <Download size={20} />
                   <span>Export Data</span>
@@ -165,11 +239,10 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer Section */}
       <SidebarFooter>
         <div className="flex items-center justify-between px-2 py-2 text-sm">
           <div
-            className="cursor-pointer hover:underline"
+            className="cursor-pointer hover:underline text-gray-700"
             onClick={() => router.push("/admin/profile")}
           >
             {name || "Admin"}
