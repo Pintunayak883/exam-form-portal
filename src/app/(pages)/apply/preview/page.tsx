@@ -584,24 +584,8 @@ export default function PreviewPage() {
 
           {/* Humble Payout Section (StarParth) */}
           <div className="preview-section">
-            <div className="flex justify-center mb-4">
-              <img
-                src="/starparth-logo.png"
-                alt="StarParth Logo"
-                width={200}
-                height={200}
-                className="object-contain"
-                crossOrigin="anonymous"
-              />
-            </div>
             <div className="text-center mb-4">
-              <p className="text-xl font-bold">
-                STARPARTH TECHNOLOGIES PVT LTD
-              </p>
-              <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
-              </p>
-              <p className="text-lg font-bold">Payout</p>
+              <p className="text-lg font-bold underline">Payout</p>
             </div>
             <div className="text-sm">
               <p>
@@ -672,7 +656,9 @@ export default function PreviewPage() {
                   Place: <strong>{formData.resident || "__________"}</strong>
                 </p>
               </div>
-              <p className="text-lg font-bold mt-6">Debit Note</p>
+              <div className="text-center mb-4">
+                <p className="text-lg font-bold underline">Debit Note</p>
+              </div>
               <p className="mt-2">
                 I <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
@@ -848,30 +834,8 @@ export default function PreviewPage() {
 
           {/* Humble Payout Section (Netparam) */}
           <div className="preview-section">
-            <div className="flex justify-between mb-4 w-full">
-              <img
-                src="/netparam-logo.png"
-                alt="Netparam Logo"
-                width={200}
-                height={200}
-                className="object-contain"
-                crossOrigin="anonymous"
-              />
-              <img
-                src="/netparam-logo-2.png"
-                alt="Netparam Secondary Logo"
-                width={200}
-                height={200}
-                className="object-contain"
-                crossOrigin="anonymous"
-              />
-            </div>
             <div className="text-center mb-4">
-              <p className="text-xl font-bold">NETPARAM TECHNOLOGIES PVT LTD</p>
-              <p className="text-sm">
-                IAF Agniveer Vayu 01/2025 (19th Mar to 26th Mar 2025)
-              </p>
-              <p className="text-lg font-bold">Payout</p>
+              <p className="text-lg font-bold underline">Payout</p>
             </div>
             <div className="text-sm">
               <p>
@@ -942,7 +906,9 @@ export default function PreviewPage() {
                   Place: <strong>{formData.resident || "__________"}</strong>
                 </p>
               </div>
-              <p className="text-lg font-bold mt-6">Debit Note</p>
+              <div className="text-center mb-4">
+                <p className="text-lg font-bold underline">Debit Note</p>
+              </div>
               <p className="mt-2">
                 I <strong>{formData.name || "__________"}</strong> S/O{" "}
                 <strong>{formData.sonOf || "__________"}</strong> Resident of{" "}
