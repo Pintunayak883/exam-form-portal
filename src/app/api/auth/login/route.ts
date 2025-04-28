@@ -1,25 +1,12 @@
-// src/app/api/login/route.ts
-
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { connectToDatabase } from "@/lib/mongodb";
 import User, { IUser } from "@/models/User";
 
-interface ResponseData {
-  message: string;
-  token?: string;
-  error?: string;
-}
-
-interface LoginData {
-  email: string;
-  password: string;
-}
-
-export async function POST(req: Request): Promise<NextResponse> {
+export async function POST(req: Request) {
   try {
-    const { email, password }: LoginData = await req.json();
+    const { email, password } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -30,8 +17,8 @@ export async function POST(req: Request): Promise<NextResponse> {
 
     await connectToDatabase();
 
-    // Find user by email
     const user: IUser | null = await User.findOne({ email });
+
     if (!user) {
       return NextResponse.json(
         { message: "Invalid credentials" },
@@ -39,11 +26,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       );
     }
 
-    // Validate password
-    const isPasswordValid: boolean = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return NextResponse.json(
         { message: "Invalid credentials" },
@@ -51,24 +34,46 @@ export async function POST(req: Request): Promise<NextResponse> {
       );
     }
 
-    // Create JWT token
-    const token: string = jwt.sign(
-      { userId: user._id, email: user.email },
+    const token = jwt.sign(
+      { userId: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: "7d" }
     );
 
-    // Send token in response (client-side will handle storage in sessionStorage)
-    return NextResponse.json(
-      {
-        message: "Login successful",
-        token: token,
+    const response = NextResponse.json({
+      message: "Login successful",
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    });
+
+    // Server side cookie set kar do yaha
+    response.cookies.set(
+      "authData",
+      JSON.stringify({
         email: user.email,
         name: user.name,
         role: user.role,
-      },
-      { status: 200 }
+        id: user._id,
+      }),
+      {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 7 * 24 * 60 * 60,
+      }
     );
+
+    response.cookies.set("token", token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      path: "/",
+      maxAge: 7 * 24 * 60 * 60,
+    });
+
+    return response;
   } catch (error: any) {
     return NextResponse.json(
       { message: "Server error", error: error.message },

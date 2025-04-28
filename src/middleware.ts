@@ -1,22 +1,49 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import jwt from "jsonwebtoken";
 
 export function middleware(req: NextRequest) {
-  // Public Routes (Ye bina login ke bhi access ho sakte hain)
   const publicRoutes = ["/login", "/register", "/about"];
-
-  // Protected Routes (Sirf login ke baad access)
   const protectedRoutes = ["/dashboard", "/profile", "/apply"];
 
   const token = req.cookies.get("token")?.value;
 
-  // Public route par token check mat karo
-  if (publicRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
+  const getRoleFromToken = (token: string | undefined) => {
+    if (!token) return null;
+    try {
+      const decode: any = jwt.decode(token);
+      return decode?.role || null;
+    } catch (error) {
+      return null;
+    }
+  };
+
+  const role = getRoleFromToken(token);
+  const path = req.nextUrl.pathname;
+
+  // Public Routes handle
+  if (publicRoutes.some((route) => path.startsWith(route))) {
+    if (token && role) {
+      if (role == "candidate") {
+        return NextResponse.redirect(new URL("/apply", req.url));
+      }
+
+      if (role == "admin") {
+        return NextResponse.redirect(new URL("/admin/dashboard", req.url));
+      }
+    }
     return NextResponse.next();
   }
 
-  // Protected route par token mandatory hai
-  if (protectedRoutes.some((route) => req.nextUrl.pathname.startsWith(route))) {
+  // Admin Routes handle
+  if (path.startsWith("/admin")) {
+    if (!token || role !== "admin") {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+  }
+
+  // Other Protected Routes
+  if (protectedRoutes.some((route) => path.startsWith(route))) {
     if (!token) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
@@ -26,5 +53,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|favicon.ico).*)"], // Har page pe chalega, except API and static files
+  matcher: ["/((?!api|_next/static|favicon.ico).*)"],
 };
