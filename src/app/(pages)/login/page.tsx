@@ -50,7 +50,8 @@ export default function LoginPage() {
       const data = response.data;
 
       if (response.status === 200) {
-        console.log(response);
+        //console.log(response);
+        //console.log(document.cookie);
         dispatch(
           loginSuccess({
             email: data.email,

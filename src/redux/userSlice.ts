@@ -1,12 +1,44 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export interface User {
+interface ApplyFormData {
   id: string;
   name: string;
-  aadhaarNo: string;
+  email: string;
+  dob: string;
   phone: string;
+  area: string;
+  landmark: string;
+  address: string;
+  examCityPreference1: string;
+  examCityPreference2: string;
+  previousCdaExperience: string;
+  cdaExperienceYears: string;
+  cdaExperienceRole: string;
+  photo: string | null;
+  signature: string | null;
+  thumbprint: string | null;
+  aadhaarNo: string;
+  penaltyClauseAgreement: boolean;
+  fever: string;
+  cough: string;
+  breathlessness: string;
+  soreThroat: string;
+  otherSymptoms: string;
+  otherSymptomsDetails: string;
+  closeContact: string;
+  covidDeclarationAgreement: boolean;
+  accountHolderName: string;
+  bankName: string;
+  ifsc: string;
+  branch: string;
+  bankAccountNo: string;
   currentDate: string;
+  sonOf: string;
+  resident: string;
+}
+
+export interface User extends ApplyFormData {
   status: "pending" | "approve" | "reject";
 }
 
@@ -27,7 +59,10 @@ export const fetchUsers = createAsyncThunk<User[]>(
   async (_, thunkAPI) => {
     try {
       const res = await axios.get("/api/admin/users");
-      const users = res.data.users.map((u: any) => ({ ...u, id: u._id }));
+      const users = res.data.users.map((u: any) => ({
+        ...u,
+        id: u._id || u.id, // Ensure id is correctly mapped
+      }));
       return users as User[];
     } catch (err: any) {
       return thunkAPI.rejectWithValue(
@@ -73,7 +108,7 @@ const userSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      // updateUserStatus handlers - do NOT toggle global loading
+      // updateUserStatus handlers
       .addCase(
         updateUserStatus.fulfilled,
         (state, action: PayloadAction<User>) => {
@@ -81,7 +116,10 @@ const userSlice = createSlice({
             user.id === action.payload.id ? action.payload : user
           );
         }
-      );
+      )
+      .addCase(updateUserStatus.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
   },
 });
 
