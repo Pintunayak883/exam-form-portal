@@ -7,7 +7,7 @@ export function middleware(req: NextRequest) {
   const protectedRoutes = ["/dashboard", "/profile", "/apply"];
 
   const token = req.cookies.get("token")?.value;
-
+  console.log("token form middleware", token);
   const getRoleFromToken = (token: string | undefined) => {
     if (!token) return null;
     try {

@@ -12,7 +12,7 @@ export interface User {
 
 interface UserState {
   users: User[];
-  loading: boolean; // only for fetch
+  loading: boolean;
   error: string | null;
 }
 

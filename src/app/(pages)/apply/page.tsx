@@ -99,7 +99,6 @@ export default function ApplyPage() {
   const getUser = async () => {
     try {
       const token = Cookies.get("token");
-
       if (!token) {
         alert("Login fir se karo bhai, token nahi mila");
         router.push("/login");

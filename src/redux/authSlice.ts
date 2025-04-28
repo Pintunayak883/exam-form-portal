@@ -34,13 +34,13 @@ const authSlice = createSlice({
       state.role = "candidate";
       state.user = null;
       Cookies.remove("token");
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("authData");
+      Cookies.remove("token");
+      Cookies.remove("authData");
     },
     setAuthFromStorage: (state) => {
       const token = Cookies.get("token");
       const authData = Cookies.get("authData");
-
+      console.log("token form authslice", token);
       if (token && authData) {
         try {
           const parsed = JSON.parse(authData);

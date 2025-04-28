@@ -50,30 +50,7 @@ export default function LoginPage() {
       const data = response.data;
 
       if (response.status === 200) {
-        // Token and user data ko cookies me store karo for production-friendly access
-        Cookies.set("token", data.token, {
-          expires: 7,
-          path: "/",
-          secure: process.env.NODE_ENV === "production", // secure flag only in production
-          sameSite: "Strict",
-        });
-
-        Cookies.set(
-          "authData",
-          JSON.stringify({
-            email: data.email,
-            name: data.name,
-            role: data.role,
-          }),
-          {
-            expires: 7,
-            path: "/",
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "Strict",
-          }
-        );
-
-        // Redux ko update karo
+        console.log(response);
         dispatch(
           loginSuccess({
             email: data.email,
@@ -82,13 +59,12 @@ export default function LoginPage() {
           })
         );
 
-        // Await router.push to ensure full transition
         if (data.role === "admin") {
-          await router.push("/admin/dashboard");
+          router.push("/admin/dashboard");
         } else if (data.role === "candidate") {
-          await router.push("/apply");
+          router.push("/apply");
         } else {
-          await router.push("/");
+          router.push("/");
         }
       } else {
         console.log(data.message);

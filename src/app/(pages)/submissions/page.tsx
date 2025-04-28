@@ -98,7 +98,7 @@ const Submission = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <p className="ml-2">Submissions load ho rahi hain, thodi der ruk...</p>
+        <p className="ml-2">Please wait..</p>
       </div>
     );
   }
@@ -115,7 +115,7 @@ const Submission = () => {
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-100 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-blue-800">
-          Tere Submissions
+          My Submissions
         </h1>
 
         {submissions.length === 0 ? (

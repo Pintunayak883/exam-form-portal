@@ -162,9 +162,9 @@ export function AppSidebar() {
               {openUserDropdown && (
                 <div className="ml-8 mt-1 text-sm flex flex-col gap-1">
                   <Link
-                    href="/admin/user-list"
+                    href="/admin/users/user-list"
                     className={
-                      pathname === "/admin/user-list"
+                      pathname === "/admin/users/user-list"
                         ? "text-primary font-semibold hover:underline"
                         : "text-gray-700 hover:underline"
                     }
@@ -172,7 +172,7 @@ export function AppSidebar() {
                     User List
                   </Link>
                   <Link
-                    href="/admin/user-submissions"
+                    href="/admin/users/user-submissions"
                     className={
                       pathname === "/admin/user-submissions"
                         ? "text-primary font-semibold hover:underline"
