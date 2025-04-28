@@ -6,6 +6,7 @@ interface AuthState {
   email: string | null;
   name: string | null;
   role: string;
+  user: string | null;
 }
 
 const initialState: AuthState = {
@@ -13,6 +14,7 @@ const initialState: AuthState = {
   email: null,
   name: null,
   role: "candidate",
+  user: null,
 };
 
 const authSlice = createSlice({
@@ -30,13 +32,14 @@ const authSlice = createSlice({
       state.email = null;
       state.name = null;
       state.role = "candidate";
+      state.user = null;
       Cookies.remove("token");
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("authData");
     },
     setAuthFromStorage: (state) => {
-      const token = sessionStorage.getItem("token") || Cookies.get("token");
-      const authData = sessionStorage.getItem("authData");
+      const token = Cookies.get("token");
+      const authData = Cookies.get("authData");
 
       if (token && authData) {
         try {
@@ -45,18 +48,21 @@ const authSlice = createSlice({
           state.email = parsed.email || null;
           state.name = parsed.name || null;
           state.role = parsed.role || "candidate";
+          state.user = parsed.user;
         } catch (err) {
           console.error("Auth parse error:", err);
           state.isAuthenticated = false;
           state.email = null;
           state.name = null;
           state.role = "candidate";
+          state.user = null;
         }
       } else {
         state.isAuthenticated = false;
         state.email = null;
         state.name = null;
         state.role = "candidate";
+        state.user = null;
       }
     },
   },
