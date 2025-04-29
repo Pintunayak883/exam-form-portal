@@ -33,6 +33,8 @@ export default function AllCandidates() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [monthFilter, setMonthFilter] = useState("all");
+  const [yearFilter, setYearFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [updatingApprove, setUpdatingApprove] = useState<{
     [id: string]: boolean;
@@ -42,17 +44,71 @@ export default function AllCandidates() {
   }>({});
   const itemsPerPage = 10;
 
+  // Available months and years for filter
+  const months = [
+    { value: "all", label: "All Months" },
+    { value: "1", label: "January" },
+    { value: "2", label: "February" },
+    { value: "3", label: "March" },
+    { value: "4", label: "April" },
+    { value: "5", label: "May" },
+    { value: "6", label: "June" },
+    { value: "7", label: "July" },
+    { value: "8", label: "August" },
+    { value: "9", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
+  ];
+
+  const years = [
+    { value: "all", label: "All Years" },
+    { value: "2023", label: "2023" },
+    { value: "2024", label: "2024" },
+    { value: "2025", label: "2025" },
+  ];
+
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
   const filtered = users
-    .filter(
-      (u) =>
-        (u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          u.aadhaarNo.includes(searchTerm)) &&
-        (statusFilter === "all" || u.status === statusFilter)
-    )
+    .filter((u) => {
+      // Validation: Check if all mandatory fields are filled
+      const mandatoryFields = [u.name, u.aadhaarNo, u.phone, u.email];
+      const isComplete = mandatoryFields.every(
+        (field) => field && field.trim() !== ""
+      );
+
+      // If user has not filled all mandatory fields, filter them out
+      if (!isComplete) return false;
+
+      // Existing search filter
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch =
+        u.name?.toLowerCase().includes(searchLower) ||
+        false ||
+        u.aadhaarNo?.includes(searchLower) ||
+        false ||
+        u.phone?.includes(searchLower) ||
+        false ||
+        u.email?.toLowerCase().includes(searchLower) ||
+        false;
+
+      const matchesStatus = statusFilter === "all" || u.status === statusFilter;
+
+      // Parse currentDate (assuming it's in ISO format like "2023-04-15")
+      const date = new Date(u.currentDate);
+      const userMonth = date.getMonth() + 1; // getMonth() is 0-based
+      const userYear = date.getFullYear();
+
+      const matchesMonth =
+        monthFilter === "all" || userMonth === parseInt(monthFilter);
+      const matchesYear =
+        yearFilter === "all" || userYear === parseInt(yearFilter);
+
+      return matchesSearch && matchesStatus && matchesMonth && matchesYear;
+    })
     .sort((a, b) =>
       a.status === "pending" && b.status !== "pending"
         ? -1
@@ -95,7 +151,7 @@ export default function AllCandidates() {
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <Input
-              placeholder="Search by name or Aadhaar..."
+              placeholder="Search by Name, Aadhaar, Phone, Email, or Exam Name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full sm:w-1/3"
@@ -109,6 +165,30 @@ export default function AllCandidates() {
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="approve">Approve</SelectItem>
                 <SelectItem value="reject">Reject</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={monthFilter} onValueChange={setMonthFilter}>
+              <SelectTrigger className="w-full sm:w-1/4">
+                <SelectValue placeholder="Filter by month" />
+              </SelectTrigger>
+              <SelectContent>
+                {months.map((month) => (
+                  <SelectItem key={month.value} value={month.value}>
+                    {month.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={yearFilter} onValueChange={setYearFilter}>
+              <SelectTrigger className="w-full sm:w-1/4">
+                <SelectValue placeholder="Filter by year" />
+              </SelectTrigger>
+              <SelectContent>
+                {years.map((year) => (
+                  <SelectItem key={year.value} value={year.value}>
+                    {year.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -127,11 +207,24 @@ export default function AllCandidates() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6}>Loading...</TableCell>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-4 text-gray-500"
+                  >
+                    <div className="flex justify-center items-center">
+                      <ClipLoader size={24} color="#666" />
+                      <span className="ml-2">Loading...</span>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ) : pageData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6}>No candidates found</TableCell>
+                  <TableCell
+                    colSpan={6}
+                    className="text-center py-6 text-gray-600 text-lg font-semibold"
+                  >
+                    No candidates found
+                  </TableCell>
                 </TableRow>
               ) : (
                 pageData.map((u) => (

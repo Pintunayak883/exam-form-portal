@@ -16,10 +16,11 @@ import { RootState, store } from "@/redux/store";
 import { useEffect } from "react";
 import { fetchUsers, updateUserStatus } from "@/redux/userSlice";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Define User type here
 type User = {
-  id: string; // Changed to id: string for MongoDB compatibility
+  id: string;
   name: string;
   aadhaarNo: string;
   phone: string;
@@ -51,7 +52,7 @@ export default function AdminDashboard() {
   const approved = users.filter((u) => u.status === "approve").length;
   const pending = users.filter((u) => u.status === "pending").length;
   const rejected = users.filter((u) => u.status === "reject").length;
-
+  const router = useRouter();
   return (
     <div className="h-full">
       {/* Header */}
@@ -142,7 +143,16 @@ export default function AdminDashboard() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" className="mr-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mr-2"
+                        onClick={() =>
+                          router.push(
+                            `/admin/users/user-submissions/viewform?id=${submission.id}`
+                          )
+                        }
+                      >
                         View
                       </Button>
                       {submission.status === "pending" && (
